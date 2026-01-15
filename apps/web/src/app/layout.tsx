@@ -6,7 +6,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'FlowAutomator',
+    title: 'R4 Otomation',
     description: 'A scalable, self-hosted workflow automation tool',
     icons: {
         icon: '/favicon.ico',

@@ -31,9 +31,9 @@ export default function LoginPage() {
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-n8n-primary to-orange-600 flex items-center justify-center">
-                        <span className="text-white font-bold text-2xl">FA</span>
+                        <span className="text-white font-bold text-2xl">R4</span>
                     </div>
-                    <h1 className="text-2xl font-bold text-n8n-text">FlowAutomator</h1>
+                    <h1 className="text-2xl font-bold text-n8n-text">R4 Otomation</h1>
                     <p className="text-n8n-text-muted mt-1">Sign in to your account</p>
                 </div>
 
