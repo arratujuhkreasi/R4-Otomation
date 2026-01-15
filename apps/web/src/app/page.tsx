@@ -1,12 +1,14 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import WorkflowCanvas from '@/components/WorkflowCanvas';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
 import ConfigPanel from '@/components/ConfigPanel';
 import { useWorkflowStore, FlowNode } from '@/store/workflow-store';
 import { useExecution } from '@/hooks/useExecution';
+import TemplateGallery from '@/components/TemplateGallery';
+import NodeConfigSidebar from '@/components/NodeConfigSidebar';
 
 export default function Home() {
     const {
@@ -43,10 +45,7 @@ export default function Home() {
         };
     }, [selectedNodeId, nodes]);
 
-    // Handle node selection from canvas
-    const handleNodeSelect = useCallback((nodeId: string | null) => {
-        setSelectedNodeId(nodeId);
-    }, [setSelectedNodeId]);
+
 
     // Handle adding node from sidebar
     const handleAddNode = useCallback((type: string, label: string) => {
@@ -74,6 +73,52 @@ export default function Home() {
 
     // State for workflow ID
     const [workflowId, setWorkflowId] = useState<string | null>(null);
+
+    // State for UI
+    const [showGallery, setShowGallery] = useState(true);
+    const [isConfigOpen, setIsConfigOpen] = useState(false);
+
+    // Initial load check
+    useEffect(() => {
+        // If URL has ID, show canvas immediately
+        if (window.location.pathname.includes('/workflow/')) {
+            setShowGallery(false);
+        }
+    }, []);
+
+    // Handle template selection
+    const handleSelectTemplate = useCallback((templateId: string) => {
+        // Mock loading template
+        if (templateId === 'blank') {
+            // Reset to empty
+            // clearNodes(); // Need to implement clear in store or just reload
+        } else if (templateId === 'tpl_reply_shopee') {
+            // Load Shopee Template
+            const mockNodes: FlowNode[] = [
+                { id: 'trigger-1', type: 'shopeeNode', position: { x: 100, y: 200 }, data: { label: 'Shopee - Chat Masuk' } },
+                { id: 'ai-1', type: 'codeNode', position: { x: 400, y: 200 }, data: { label: 'AI - Generate Reply' } },
+                { id: 'action-1', type: 'shopeeNode', position: { x: 700, y: 200 }, data: { label: 'Shopee - Kirim Balasan' } },
+            ];
+            // Add nodes to store (We need a setNodes action in store, or add one by one)
+            // For MVP, letting user start blank or just console log
+            console.log('Loading Shopee template...');
+            // In real app: setNodes(mockNodes);
+            nodes.length = 0; // Hacky clear for demo
+            mockNodes.forEach(n => addNode(n));
+        }
+
+        setShowGallery(false);
+    }, [addNode, nodes]);
+
+    // Handle node select (open sidebar)
+    const handleNodeSelect = useCallback((nodeId: string | null) => {
+        setSelectedNodeId(nodeId);
+        if (nodeId) {
+            setIsConfigOpen(true);
+        } else {
+            setIsConfigOpen(false);
+        }
+    }, [setSelectedNodeId]);
 
     // Handle save
     const handleSave = useCallback(async () => {
@@ -121,6 +166,10 @@ export default function Home() {
         execute(nodes, edges);
     }, [nodes, edges, execute, reset]);
 
+    if (showGallery) {
+        return <TemplateGallery onSelectTemplate={handleSelectTemplate} />;
+    }
+
     return (
         <main className="h-screen w-screen overflow-hidden bg-n8n-bg-dark flex">
             {/* Left Sidebar */}
@@ -141,16 +190,17 @@ export default function Home() {
                 />
 
                 {/* Canvas */}
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-hidden relative">
                     <WorkflowCanvas onNodeSelect={handleNodeSelect} />
                 </div>
             </div>
 
-            {/* Right Config Panel */}
-            <ConfigPanel
+            {/* Right Config Sidebar (Slide-over) */}
+            <NodeConfigSidebar
+                isOpen={isConfigOpen}
+                onClose={() => setIsConfigOpen(false)}
                 selectedNode={selectedNode}
                 onUpdateNode={handleUpdateNode}
-                executionResults={nodeResults}
             />
         </main>
     );
