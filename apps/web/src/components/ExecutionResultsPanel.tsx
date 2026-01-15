@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { NodeExecutionResult } from '@flowautomator/shared-types';
+import type { NodeExecutionResult } from '@/types';
 
 interface ExecutionResultsPanelProps {
     isConnected: boolean;
