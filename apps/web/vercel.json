@@ -1,9 +1,6 @@
 {
-    "github": {
-        "silent": true
-    },
-    "buildCommand": "npm run build",
+    "installCommand": "npm install",
+    "buildCommand": "prisma generate && next build",
     "outputDirectory": ".next",
-    "framework": "nextjs",
-    "installCommand": "npm install"
+    "framework": "nextjs"
 }
