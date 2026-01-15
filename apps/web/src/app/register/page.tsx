@@ -42,7 +42,7 @@ export default function RegisterPage() {
         <div className="min-h-screen bg-n8n-bg-dark flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 {/* Logo */}
-                <div className The="text-center mb-8">
+                <div className="text-center mb-8">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-n8n-primary to-orange-600 flex items-center justify-center">
                         <span className="text-white font-bold text-2xl">FA</span>
                     </div>
