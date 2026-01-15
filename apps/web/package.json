@@ -4,10 +4,10 @@
     "private": true,
     "scripts": {
         "dev": "next dev -p 3005",
-        "build": "prisma generate && next build",
+        "build": "npx prisma generate --schema=./prisma/schema.prisma && next build",
         "start": "next start -p 3005",
         "lint": "next lint",
-        "postinstall": "prisma generate"
+        "postinstall": "npx prisma generate --schema=./prisma/schema.prisma"
     },
     "dependencies": {
         "@prisma/client": "^5.22.0",

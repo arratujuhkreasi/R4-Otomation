@@ -1,8 +1,8 @@
 // Prisma schema for FlowAutomator (Vercel Deployment)
-// Copy dari apps/api/prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated/client"
 }
 
 datasource db {
@@ -59,8 +59,8 @@ model Workflow {
   description String?
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  nodes       Json
-  edges       Json
+  nodes       Json     @default("[]")
+  edges       Json     @default("[]")
   active      Boolean  @default(false)
   webhookId   String?  @unique
   webhookPath String?
@@ -112,7 +112,7 @@ model Credential {
   type        String
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  data        String   // Encrypted
+  data        String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
