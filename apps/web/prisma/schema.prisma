@@ -1,0 +1,121 @@
+// Prisma schema for FlowAutomator (Vercel Deployment)
+// Copy dari apps/api/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User & Authentication
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  name          String?
+  role          UserRole  @default(USER)
+  emailVerified Boolean   @default(false)
+  verifyToken   String?
+  resetToken    String?
+  resetExpires  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  workflows     Workflow[]
+  credentials   Credential[]
+  sessions      Session[]
+  
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken String   @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  
+  @@index([userId])
+  @@map("sessions")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+// Workflow
+model Workflow {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nodes       Json
+  edges       Json
+  active      Boolean  @default(false)
+  webhookId   String?  @unique
+  webhookPath String?
+  cronExpression String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  executions  Execution[]
+  
+  @@index([userId])
+  @@map("workflows")
+}
+
+// Execution
+model Execution {
+  id          String          @id @default(uuid())
+  workflowId  String
+  workflow    Workflow        @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  status      ExecutionStatus @default(PENDING)
+  triggeredBy TriggerType     @default(MANUAL)
+  inputData   Json?
+  nodeResults Json            @default("[]")
+  error       String?
+  startedAt   DateTime        @default(now())
+  finishedAt  DateTime?
+  
+  @@index([workflowId])
+  @@map("executions")
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  ERROR
+  CANCELLED
+}
+
+enum TriggerType {
+  MANUAL
+  WEBHOOK
+  CRON
+  API
+}
+
+// Credentials (Encrypted)
+model Credential {
+  id          String   @id @default(uuid())
+  name        String
+  type        String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data        String   // Encrypted
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@map("credentials")
+}
