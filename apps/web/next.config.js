@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    transpilePackages: ['@flowautomator/shared-types'],
+    experimental: {
+        serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs'],
+    },
 };
 
 module.exports = nextConfig;
