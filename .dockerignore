@@ -1,0 +1,29 @@
+# Docker
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+dist
+build
+.next
+out
+
+# Dev files
+*.log
+*.md
+.git
+.gitignore
+.vscode
+.idea
+*.test.ts
+*.spec.ts
+__tests__
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Workflow model - stores the workflow definition
+model Workflow {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+
+  // JSON structure containing nodes and edges
+  nodes Json // Array of WorkflowNode
+  edges Json // Array of WorkflowEdge
+
+  active Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation to executions
+  executions Execution[]
+
+  @@map("workflows")
+}
+
+// Execution model - tracks workflow execution instances
+model Execution {
+  id String @id @default(uuid())
+
+  // Parent workflow
+  workflowId String
+  workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  status ExecutionStatus @default(PENDING)
+
+  // Trigger source
+  triggeredBy TriggerType @default(MANUAL)
+
+  // Execution results per node
+  nodeResults Json @default("[]") // Array of NodeExecutionResult
+
+  // Error message if execution failed
+  error String?
+
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  @@index([workflowId])
+  @@index([status])
+  @@map("executions")
+}
+
+// Execution status enum
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  ERROR
+  CANCELLED
+}
+
+// Trigger type enum
+enum TriggerType {
+  MANUAL
+  WEBHOOK
+  CRON
+}

@@ -1,0 +1,25 @@
+# Spacefile - Deta.space Configuration
+# https://deta.space/docs/en/build/reference/spacefile
+
+v: 0
+micros:
+  - name: api
+    src: ./
+    engine: nodejs18
+    primary: true
+    run: npm run start:prod
+    dev: npm run start:dev
+    presets:
+      env:
+        - name: DATABASE_URL
+          description: Neon PostgreSQL connection string
+        - name: JWT_SECRET
+          description: JWT signing secret
+        - name: ENCRYPTION_KEY
+          description: AES encryption key for credentials
+        - name: NODE_ENV
+          default: production
+    public_routes:
+      - "/api/auth/*"
+      - "/api/nodes/*"
+      - "/health"

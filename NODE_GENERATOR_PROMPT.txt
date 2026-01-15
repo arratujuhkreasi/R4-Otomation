@@ -1,0 +1,28 @@
+# TASK: Generate a New Integration Node
+# REFERENCE: `packages/server/src/nodes/Node.interface.ts` (Use the interface established previously)
+
+I need you to create a full integration node for: **[NAMA LAYANAN, contoh: Telegram Bot]**.
+
+## Requirements:
+1. **File Structure:**
+   - Create `packages/server/src/nodes/[nama-layanan]/[nama-layanan].node.ts`
+   - Create `packages/server/src/nodes/[nama-layanan]/[nama-layanan].types.ts`
+
+2. **Node Properties (UI Inputs):**
+   - Define the inputs required based on standard API needs for this service.
+   - Example: If it's Telegram, I need 'Chat ID' and 'Message Text'.
+   - If the service has multiple operations (e.g., 'Send Message', 'Get File'), create a dropdown property called 'Operation' to select the mode.
+
+3. **Execution Logic:**
+   - Implement the `execute` method using the standard `axios` library.
+   - Handle Authentication properly (Assume credentials are passed via the `credentials` argument).
+   - Return the JSON response from the API directly.
+
+4. **Documentation:**
+   - Add comments explaining how the user should get their API Key/Token for this service.
+
+## Specific API Details for this Service:
+(Jika Anda punya link dokumentasi, tempel di sini. Jika tidak, biarkan AI menggunakan pengetahuannya).
+- Please assume standard REST API endpoints for **[NAMA LAYANAN]**.
+
+GENERATE THE TYPESCRIPT CODE NOW.

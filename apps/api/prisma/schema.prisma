@@ -1,0 +1,215 @@
+// Prisma schema for FlowAutomator
+// Production-ready with User authentication
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// USER & AUTHENTICATION
+// ============================================================
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String    // bcrypt hashed
+  name          String?
+  role          UserRole  @default(USER)
+  
+  // Email verification
+  emailVerified Boolean   @default(false)
+  verifyToken   String?
+  
+  // Password reset
+  resetToken    String?
+  resetExpires  DateTime?
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  // Relations
+  workflows     Workflow[]
+  credentials   Credential[]
+  sessions      Session[]
+  
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  refreshToken String   @unique
+  userAgent    String?
+  ipAddress    String?
+  
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  
+  @@index([userId])
+  @@index([refreshToken])
+  @@map("sessions")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+// ============================================================
+// WORKFLOW
+// ============================================================
+
+model Workflow {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  
+  // Owner
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // JSON structure containing nodes and edges
+  nodes       Json     // Array of WorkflowNode
+  edges       Json     // Array of WorkflowEdge
+  
+  active      Boolean  @default(false)
+  
+  // Webhook settings
+  webhookId   String?  @unique
+  webhookPath String?
+  
+  // Schedule settings
+  cronExpression String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  executions  Execution[]
+  
+  @@index([userId])
+  @@index([active])
+  @@map("workflows")
+}
+
+// ============================================================
+// EXECUTION
+// ============================================================
+
+model Execution {
+  id          String          @id @default(uuid())
+  
+  workflowId  String
+  workflow    Workflow        @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  
+  status      ExecutionStatus @default(PENDING)
+  triggeredBy TriggerType     @default(MANUAL)
+  
+  // Execution data
+  inputData   Json?
+  nodeResults Json            @default("[]")
+  error       String?
+  
+  startedAt   DateTime        @default(now())
+  finishedAt  DateTime?
+  
+  @@index([workflowId])
+  @@index([status])
+  @@index([startedAt])
+  @@map("executions")
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  ERROR
+  CANCELLED
+}
+
+enum TriggerType {
+  MANUAL
+  WEBHOOK
+  CRON
+  API
+}
+
+// ============================================================
+// CREDENTIALS (Encrypted)
+// ============================================================
+
+model Credential {
+  id          String   @id @default(uuid())
+  name        String
+  type        String   // e.g., 'tokopediaApi', 'instagramApi'
+  
+  // Owner
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Encrypted data (AES-256)
+  data        String   // Encrypted JSON string
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([type])
+  @@map("credentials")
+}
+
+// ============================================================
+// API KEYS (For external API access)
+// ============================================================
+
+model ApiKey {
+  id          String   @id @default(uuid())
+  name        String
+  key         String   @unique // hashed
+  keyPreview  String   // last 4 chars for display
+  
+  userId      String
+  
+  permissions Json     @default("[]") // Array of permissions
+  
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([key])
+  @@map("api_keys")
+}
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String   // e.g., 'workflow.create', 'credential.update'
+  resource  String   // Resource type
+  resourceId String? // Resource ID
+  details   Json?    // Additional details
+  ipAddress String?
+  userAgent String?
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
