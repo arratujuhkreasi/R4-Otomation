@@ -2,7 +2,7 @@
  * Prisma Client for Vercel Serverless
  */
 
-import { PrismaClient } from '../prisma/generated/client';
+import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined;
