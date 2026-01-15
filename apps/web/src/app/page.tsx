@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import WorkflowCanvas from '@/components/WorkflowCanvas';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
@@ -72,13 +72,48 @@ export default function Home() {
         setMetadata({ name });
     }, [setMetadata]);
 
+    // State for workflow ID
+    const [workflowId, setWorkflowId] = useState<string | null>(null);
+
     // Handle save
     const handleSave = useCallback(async () => {
         setIsSaving(true);
-        // Simulate save
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setIsSaving(false);
-    }, [setIsSaving]);
+        try {
+            const token = localStorage.getItem('accessToken');
+            const method = workflowId ? 'PUT' : 'POST';
+            const url = workflowId ? `/api/workflows/${workflowId}` : '/api/workflows';
+
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    name: metadata.name,
+                    nodes,
+                    edges,
+                }),
+            });
+
+            if (!res.ok) throw new Error('Failed to save');
+
+            const data = await res.json();
+
+            if (!workflowId) {
+                setWorkflowId(data.id);
+                // Optional: Update URL without reload
+                window.history.pushState({}, '', `/workflow/${data.id}`);
+            }
+
+            // alert('Workflow saved successfully!'); 
+        } catch (error) {
+            console.error('Save error:', error);
+            alert('Failed to save workflow');
+        } finally {
+            setIsSaving(false);
+        }
+    }, [workflowId, metadata.name, nodes, edges, setIsSaving]);
 
     // Handle execute
     const handleExecute = useCallback(() => {
