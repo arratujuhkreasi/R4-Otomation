@@ -9,6 +9,8 @@ import { useWorkflowStore, FlowNode } from '@/store/workflow-store';
 import { useExecution } from '@/hooks/useExecution';
 import TemplateGallery from '@/components/TemplateGallery';
 import NodeConfigSidebar from '@/components/NodeConfigSidebar';
+import Navbar from '@/components/Navbar';
+import SidebarMenu from '@/components/SidebarMenu';
 
 export default function Home() {
     const {
@@ -166,42 +168,48 @@ export default function Home() {
         execute(nodes, edges);
     }, [nodes, edges, execute, reset]);
 
+    // ... (Keep existing template gallery check)
     if (showGallery) {
         return <TemplateGallery onSelectTemplate={handleSelectTemplate} />;
     }
 
     return (
-        <main className="h-screen w-screen overflow-hidden bg-n8n-bg-dark flex">
-            {/* Left Sidebar */}
-            <Sidebar onAddNode={handleAddNode} />
+        <div className="h-screen w-screen overflow-hidden bg-n8n-bg-dark flex flex-col">
+            {/* Global Navbar */}
+            <Navbar isConnected={isConnected} />
 
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Top Bar */}
-                <TopBar
-                    workflowName={metadata.name}
-                    onNameChange={handleNameChange}
-                    onSave={handleSave}
-                    onExecute={handleExecute}
-                    isExecuting={isExecuting}
-                    isSaving={isSaving}
-                    nodeCount={nodes.length}
-                    edgeCount={edges.length}
-                />
+            <div className="flex-1 flex overflow-hidden">
+                {/* Left Sidebar (Toolbox) */}
+                <SidebarMenu onAddNode={handleAddNode} />
 
-                {/* Canvas */}
-                <div className="flex-1 overflow-hidden relative">
-                    <WorkflowCanvas onNodeSelect={handleNodeSelect} />
+                {/* Main Content */}
+                <div className="flex-1 flex flex-col overflow-hidden">
+                    {/* Top Bar (Workflow Actions) */}
+                    <TopBar
+                        workflowName={metadata.name}
+                        onNameChange={handleNameChange}
+                        onSave={handleSave}
+                        onExecute={handleExecute}
+                        isExecuting={isExecuting}
+                        isSaving={isSaving}
+                        nodeCount={nodes.length}
+                        edgeCount={edges.length}
+                    />
+
+                    {/* Canvas */}
+                    <div className="flex-1 overflow-hidden relative">
+                        <WorkflowCanvas onNodeSelect={handleNodeSelect} />
+                    </div>
                 </div>
-            </div>
 
-            {/* Right Config Sidebar (Slide-over) */}
-            <NodeConfigSidebar
-                isOpen={isConfigOpen}
-                onClose={() => setIsConfigOpen(false)}
-                selectedNode={selectedNode}
-                onUpdateNode={handleUpdateNode}
-            />
-        </main>
+                {/* Right Config Sidebar (Slide-over) */}
+                <NodeConfigSidebar
+                    isOpen={isConfigOpen}
+                    onClose={() => setIsConfigOpen(false)}
+                    selectedNode={selectedNode}
+                    onUpdateNode={handleUpdateNode}
+                />
+            </div>
+        </div>
     );
 }
